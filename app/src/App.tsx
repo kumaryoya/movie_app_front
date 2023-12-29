@@ -12,12 +12,15 @@ const App: React.FC = () => {
   const [detailModalIsOpen, setDetailModalIsOpen] = useState(false);
   const [deleteConfirmModalIsOpen, setDeleteConfirmModalIsOpen] = useState(false);
 
+  // 環境変数からAPIのURLを取得
+  const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:3001';
+
   useEffect(() => {
     fetchMovies();
   }, []);
 
   const fetchMovies = () => {
-    axios.get('http://localhost:3001/movies')
+    axios.get(`${apiUrl}/movies`)
       .then(response => setMovies(response.data))
       .catch(error => console.error("Error fetching data: ", error));
   };
@@ -35,13 +38,14 @@ const App: React.FC = () => {
   };
 
   const onSave = (movieData: any) => {
-    if (currentMovie && currentMovie.id) {
-      axios.put(`http://localhost:3001/movies/${currentMovie.id}`, movieData)
-        .then(() => fetchMovies());
-    } else {
-      axios.post('http://localhost:3001/movies', movieData)
-        .then(() => fetchMovies());
-    }
+    const url = currentMovie && currentMovie.id
+      ? `${apiUrl}/movies/${currentMovie.id}`
+      : `${apiUrl}/movies`;
+
+    axios[currentMovie && currentMovie.id ? 'put' : 'post'](url, movieData)
+      .then(() => fetchMovies())
+      .catch(error => console.error("Error saving movie: ", error));
+
     closeModal();
   };
 
@@ -57,7 +61,7 @@ const App: React.FC = () => {
 
   const onDeleteConfirmed = () => {
     if (currentMovie && currentMovie.id) {
-      axios.delete(`http://localhost:3001/movies/${currentMovie.id}`)
+      axios.delete(`${apiUrl}/movies/${currentMovie.id}`)
         .then(() => {
           fetchMovies();
           closeModal();
