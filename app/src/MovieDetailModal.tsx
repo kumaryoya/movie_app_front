@@ -4,7 +4,7 @@ import Modal from 'react-modal';
 const MovieDetailModal: React.FC<{
   isOpen: boolean,
   onClose: () => void,
-  movie: any // 映画の詳細情報を保持するプロパティ
+  movie: any
 }> = ({ isOpen, onClose, movie }) => {
   if (!movie) return null;
 
@@ -12,10 +12,15 @@ const MovieDetailModal: React.FC<{
 
   return (
     <Modal isOpen={isOpen} onRequestClose={onClose}>
-      <h2>{movie.title}</h2>
-      <p>{movie.overview}</p>
-      {posterURL && <img src={posterURL} alt={`Poster of ${movie.title}`} />} {/* ポスター画像を表示 */}
-      <button onClick={onClose}>閉じる</button>
+      <div className='items-center text-center mx-20 py-5'>
+        <h2 className='py-5'>{movie.title}</h2>
+        {posterURL && <img className='mx-auto py-5' src={posterURL} alt={`Poster of ${movie.title}`} />}
+        <div className="text-lg">{movie.release_date} 公開</div>
+        <p className='py-5'>{movie.overview}</p>
+        <p className='py-5'>投稿者 {movie.name}</p>
+        <p className='py-5'>コメント {movie.comment}</p>
+        <button className='btn my-5' onClick={onClose}>閉じる</button>
+      </div>
     </Modal>
   );
 };

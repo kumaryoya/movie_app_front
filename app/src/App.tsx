@@ -5,15 +5,24 @@ import MovieModal from './MovieModal';
 import MovieDetailModal from './MovieDetailModal';
 import DeleteConfirmModal from './DeleteConfirmModal';
 
+interface Movie {
+  id: number;
+  title: string;
+  overview: string;
+  poster_path: string;
+  release_date: string;
+  name: string;
+  comment: string;
+}
+
 const App: React.FC = () => {
-  const [movies, setMovies] = useState<any[]>([]);
-  const [currentMovie, setCurrentMovie] = useState<any>(null);
+  const [movies, setMovies] = useState<Movie[]>([]);
+  const [currentMovie, setCurrentMovie] = useState<Movie | null>(null);
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [detailModalIsOpen, setDetailModalIsOpen] = useState(false);
   const [deleteConfirmModalIsOpen, setDeleteConfirmModalIsOpen] = useState(false);
 
-  // 環境変数からAPIのURLを取得
-  const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:3001';
+  const apiUrl = process.env.REACT_APP_API_URL;
 
   useEffect(() => {
     fetchMovies();
@@ -25,9 +34,11 @@ const App: React.FC = () => {
       .catch(error => console.error("Error fetching data: ", error));
   };
 
-  const openModal = (movie: any = null) => {
+  const openModal = (movie: Movie | null = null) => {
     setCurrentMovie(movie);
     setModalIsOpen(true);
+    setDetailModalIsOpen(false);
+    setDeleteConfirmModalIsOpen(false);
   };
 
   const closeModal = () => {
@@ -43,20 +54,29 @@ const App: React.FC = () => {
       : `${apiUrl}/movies`;
 
     axios[currentMovie && currentMovie.id ? 'put' : 'post'](url, movieData)
-      .then(() => fetchMovies())
+      .then(response => {
+        if (currentMovie && currentMovie.id) {
+          setMovies(movies.map(movie => movie.id === currentMovie.id ? response.data : movie));
+        } else {
+          setMovies([...movies, response.data]);
+        }
+        closeModal();
+      })
       .catch(error => console.error("Error saving movie: ", error));
-
-    closeModal();
   };
 
-  const showMovieDetail = (movie: any) => {
+  const showMovieDetail = (movie: Movie) => {
     setCurrentMovie(movie);
     setDetailModalIsOpen(true);
+    setModalIsOpen(false);
+    setDeleteConfirmModalIsOpen(false);
   };
 
-  const confirmDelete = (movie: any) => {
+  const confirmDelete = (movie: Movie) => {
     setCurrentMovie(movie);
     setDeleteConfirmModalIsOpen(true);
+    setModalIsOpen(false);
+    setDetailModalIsOpen(false);
   };
 
   const onDeleteConfirmed = () => {
@@ -71,10 +91,15 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className='bg_image items-center text-center py-8'>
-      <button className='btn text-3xl mb-5' onClick={() => openModal()}>新規投稿</button>
+    <div className='bg_image items-center text-center py-20'>
+      <button className='btn text-3xl mb-10' onClick={() => openModal()}>新規投稿</button>
       <div className="flex flex-wrap items-center justify-center text-center mx-auto">
-        <MovieModal isOpen={modalIsOpen} onClose={closeModal} onSave={onSave}/>
+        <MovieModal
+          isOpen={modalIsOpen}
+          onClose={closeModal}
+          onSave={onSave}
+          movie={currentMovie}
+        />
         {movies.map(movie => (
           <Movie
             key={movie.id}

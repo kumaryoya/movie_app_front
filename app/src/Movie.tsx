@@ -15,8 +15,8 @@ const Movie: React.FC<{
       </figure>
       <div className="card-body items-center justify-center text-center flex space-between">
         <div className="text-2xl">{movie.title}</div>
-        <div className="text-lg">{movie.release_date}</div>
-        <div className="text-lg">{movie.name}</div>
+        <div className="text-lg">{movie.release_date} 公開</div>
+        <div className="text-lg pb-5">投稿者 {movie.name}</div>
         <div className="flex mx-auto">
           <button onClick={onDetail} className="btn mx-3">詳細</button>
           <button onClick={onEdit} className="btn mx-3">編集</button>
