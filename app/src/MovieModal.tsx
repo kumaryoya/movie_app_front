@@ -43,6 +43,14 @@ const MovieModal: React.FC<MovieModalProps> = ({ isOpen, onClose, onSave, movie 
     }
   }, [isOpen]);
 
+  useEffect(() => {
+    if (searchTerm.length > 0) {
+      handleSearch();
+    } else {
+      setSearchResults([]);
+    }
+  }, [searchTerm]);
+
   const handleSearch = async () => {
     const apiKey = process.env.REACT_APP_TMDB_API_KEY;
     try {
@@ -114,8 +122,8 @@ const MovieModal: React.FC<MovieModalProps> = ({ isOpen, onClose, onSave, movie 
       )}
 
       {selectedMovie && (
-        <div className='items-center text-center mx-20 py-5'>
-          <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit}>
+          <div className='items-center text-center mx-20 py-5'>
             <h2 className='py-5'>{selectedMovie.title}</h2>
             <p className='py-5'>{selectedMovie.overview}</p>
             {selectedMovie.poster_path && (
@@ -147,8 +155,8 @@ const MovieModal: React.FC<MovieModalProps> = ({ isOpen, onClose, onSave, movie 
                 投稿
               </button>
             </div>
-          </form>
-        </div>
+          </div>
+        </form>
       )}
     </Modal>
   );
