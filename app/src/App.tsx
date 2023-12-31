@@ -22,7 +22,7 @@ const App: React.FC = () => {
   const [detailModalIsOpen, setDetailModalIsOpen] = useState(false);
   const [deleteConfirmModalIsOpen, setDeleteConfirmModalIsOpen] = useState(false);
 
-  const apiUrl = process.env.REACT_APP_API_URL;
+  const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:3001';
 
   useEffect(() => {
     fetchMovies();
@@ -34,11 +34,25 @@ const App: React.FC = () => {
       .catch(error => console.error("Error fetching data: ", error));
   };
 
-  const openModal = (movie: Movie | null = null) => {
+  const openMovieModal = (movie: Movie | null = null) => {
     setCurrentMovie(movie);
     setModalIsOpen(true);
     setDetailModalIsOpen(false);
     setDeleteConfirmModalIsOpen(false);
+  };
+
+  const openDetailModal = (movie: Movie) => {
+    setCurrentMovie(movie);
+    setDetailModalIsOpen(true);
+    setModalIsOpen(false);
+    setDeleteConfirmModalIsOpen(false);
+  };
+
+  const openDeleteConfirmModal = (movie: Movie) => {
+    setCurrentMovie(movie);
+    setDeleteConfirmModalIsOpen(true);
+    setModalIsOpen(false);
+    setDetailModalIsOpen(false);
   };
 
   const closeModal = () => {
@@ -65,20 +79,6 @@ const App: React.FC = () => {
       .catch(error => console.error("Error saving movie: ", error));
   };
 
-  const showMovieDetail = (movie: Movie) => {
-    setCurrentMovie(movie);
-    setDetailModalIsOpen(true);
-    setModalIsOpen(false);
-    setDeleteConfirmModalIsOpen(false);
-  };
-
-  const confirmDelete = (movie: Movie) => {
-    setCurrentMovie(movie);
-    setDeleteConfirmModalIsOpen(true);
-    setModalIsOpen(false);
-    setDetailModalIsOpen(false);
-  };
-
   const onDeleteConfirmed = () => {
     if (currentMovie && currentMovie.id) {
       axios.delete(`${apiUrl}/movies/${currentMovie.id}`)
@@ -92,33 +92,39 @@ const App: React.FC = () => {
 
   return (
     <div className='bg_image items-center text-center py-20'>
-      <button className='btn text-3xl mb-10' onClick={() => openModal()}>新規投稿</button>
+      <button className='btn text-3xl mb-10' onClick={() => openMovieModal()}>新規投稿</button>
       <div className="flex flex-wrap items-center justify-center text-center mx-auto">
-        <MovieModal
-          isOpen={modalIsOpen}
-          onClose={closeModal}
-          onSave={onSave}
-          movie={currentMovie}
-        />
+        {modalIsOpen && (
+          <MovieModal
+            isOpen={modalIsOpen}
+            onClose={closeModal}
+            onSave={onSave}
+            movie={currentMovie}
+          />
+        )}
+        {detailModalIsOpen && (
+          <MovieDetailModal
+            isOpen={detailModalIsOpen}
+            onClose={closeModal}
+            movie={currentMovie}
+          />
+        )}
+        {deleteConfirmModalIsOpen && (
+          <DeleteConfirmModal
+            isOpen={deleteConfirmModalIsOpen}
+            onClose={closeModal}
+            onConfirm={onDeleteConfirmed}
+          />
+        )}
         {movies.map(movie => (
           <Movie
             key={movie.id}
             movie={movie}
-            onEdit={() => openModal(movie)}
-            onDelete={() => confirmDelete(movie)}
-            onDetail={() => showMovieDetail(movie)}
+            onEdit={() => openMovieModal(movie)}
+            onDelete={() => openDeleteConfirmModal(movie)}
+            onDetail={() => openDetailModal(movie)}
           />
         ))}
-        <MovieDetailModal
-          isOpen={detailModalIsOpen}
-          onClose={closeModal}
-          movie={currentMovie}
-        />
-        <DeleteConfirmModal
-          isOpen={deleteConfirmModalIsOpen}
-          onClose={closeModal}
-          onConfirm={onDeleteConfirmed}
-        />
       </div>
     </div>
   );
