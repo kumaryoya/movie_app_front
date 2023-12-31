@@ -49,7 +49,10 @@ const MovieModal: React.FC<MovieModalProps> = ({ isOpen, onClose, onSave, movie 
       const response = await fetch(`https://api.themoviedb.org/3/search/movie?api_key=${apiKey}&language=ja&query=${encodeURIComponent(searchTerm)}`);
       const data = await response.json();
       if (response.ok) {
-        setSearchResults(data.results);
+        const filteredResults = data.results.filter((movie: Movie) =>
+          movie.title && movie.overview && movie.poster_path && movie.release_date
+        );
+        setSearchResults(filteredResults);
       } else {
         console.error('Search failed:', data);
       }
